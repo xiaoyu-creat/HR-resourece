@@ -1,26 +1,21 @@
 <template>
   <div class="login-container">
-    <el-form ref="loginForm" :model="loginForm" :rules="loginRules" class="login-form" auto-complete="on" label-position="left">
-
+    <el-form
+      ref="loginForm"
+      class="login-form"
+      auto-complete="on"
+      label-position="left"
+      :model="loginForm"
+      :rules="rules"
+    >
       <div class="title-container">
         <h3 class="title">
           <img src="@/assets/common/login-logo.png" alt="">
         </h3>
       </div>
-
-      <el-form-item prop="username">
-        <span class="svg-container">
-          <svg-icon icon-class="user" />
-        </span>
-        <el-input
-          ref="username"
-          v-model="loginForm.username"
-          placeholder="Username"
-          name="username"
-          type="text"
-          tabindex="1"
-          auto-complete="on"
-        />
+      <el-form-item prop="mobile">
+        <span class="svg-container el-icon-user-solid" />
+        <el-input v-model="loginForm.mobile" />
       </el-form-item>
 
       <el-form-item prop="password">
@@ -28,28 +23,21 @@
           <svg-icon icon-class="password" />
         </span>
         <el-input
-          :key="passwordType"
-          ref="password"
+          ref="pwd"
           v-model="loginForm.password"
           :type="passwordType"
-          placeholder="Password"
-          name="password"
-          tabindex="2"
-          auto-complete="on"
-          @keyup.enter.native="handleLogin"
         />
-        <span class="show-pwd" @click="showPwd">
-          <svg-icon :icon-class="passwordType === 'password' ? 'eye' : 'eye-open'" />
+        <span class="svg-container" @click="showPwd">
+          <svg-icon :icon-class="passwordType === 'password' ? 'eye':'eye-open'" />
         </span>
       </el-form-item>
 
-      <el-button class="loginBtn" :loading="loading" type="primary" style="width:100%;margin-bottom:30px;" @click.native.prevent="handleLogin">Login</el-button>
+      <el-button :loading="loading" class="loginBtn" @click="login">登录</el-button>
 
       <div class="tips">
-        <span style="margin-right:20px;">username: admin</span>
-        <span> password: any</span>
+        <span style="margin-right:20px;">账号: 13800000002</span>
+        <span> 密码: 123456</span>
       </div>
-
     </el-form>
   </div>
 </template>
@@ -61,74 +49,91 @@
 // 开发环境的接口前缀 /api
 // 线上环境的接口前缀 /prod-api
 
-// 在 request.js中配置baseUrl:process.env.VUE_APP_BASE_API
-import { validUsername } from '@/utils/validate'
+// 在 request.js中配置baseURL:process.env.VUE_APP_BASE_API
+// import { validUsername } from '@/utils/validate'
 
+// 密码盒子切换
+// 1.点击闭上眼睛图片 --》睁开type text 图片变为 睁开眼睛
+// 2.图片睁开眼睛 --》闭上 type password 图片变为 闭上眼睛
+
+// - El-form-item绑定对应的属性，El-input 绑定对应的值
+// - 手机号 必填 格式 按照国家要求来
+// - 密码  必填  程度6，16
+
+import { validPhone } from '@/utils/validate'
 export default {
   name: 'Login',
   data() {
-    const validateUsername = (rule, value, callback) => {
-      if (!validUsername(value)) {
-        callback(new Error('Please enter the correct user name'))
-      } else {
-        callback()
-      }
-    }
-    const validatePassword = (rule, value, callback) => {
-      if (value.length < 6) {
-        callback(new Error('The password can not be less than 6 digits'))
+    // Validator接口有三个方法，可用于验证整个实体或仅验证实体的单个属性
+    const phoneValid = (rules, value, callback) => {
+      // rule 对应的规则
+      // value 对应的值
+      // callback 验证完成后调用的回调函数 验证通过直接调用 验证不通过 也是 调用 callback,但是会把错误信息 传递出去
+      if (!validPhone(value)) {
+        callback(new Error('格式错误'))
       } else {
         callback()
       }
     }
     return {
-      loginForm: {
-        username: 'admin',
-        password: '111111'
-      },
-      loginRules: {
-        username: [{ required: true, trigger: 'blur', validator: validateUsername }],
-        password: [{ required: true, trigger: 'blur', validator: validatePassword }]
-      },
-      loading: false,
       passwordType: 'password',
-      redirect: undefined
+      loginForm: {
+        mobile: '13800000002',
+        password: '123456'
+      },
+      rules: {
+        mobile: [
+          {
+            required: true,
+            message: '手机号必填',
+            trigger: 'blur'
+          },
+          { validator: phoneValid, trigger: 'blur' }
+          // {
+          //   pattern: /^(?:(?:\+|00)86)?1(?:(?:3[\d])|(?:4[5-79])|(?:5[0-35-9])|(?:6[5-7])|(?:7[0-8])|(?:8[\d])|(?:9[189]))\d{8}$/,
+          //   message: '手机号格式不正确',
+          //   trigger: 'blur'
+          // }
+        ],
+        password: [
+          {
+            required: true,
+            message: '密码必填',
+            trigger: 'blur'
+          },
+          {
+            min: 6,
+            max: 16,
+            message: '密码格式不正确',
+            trigger: 'blur'
+          }
+        ]
+      },
+      loading: false
     }
   },
   watch: {
-    $route: {
-      handler: function(route) {
-        this.redirect = route.query && route.query.redirect
-      },
-      immediate: true
-    }
+
   },
   methods: {
     showPwd() {
-      if (this.passwordType === 'password') {
-        this.passwordType = ''
-      } else {
-        this.passwordType = 'password'
-      }
+      this.passwordType === 'password' ? this.passwordType = '' : this.passwordType = 'password'
       this.$nextTick(() => {
-        this.$refs.password.focus()
+        this.$refs.pwd.focus()
       })
     },
-    handleLogin() {
-      this.$refs.loginForm.validate(valid => {
-        if (valid) {
-          this.loading = true
-          this.$store.dispatch('user/login', this.loginForm).then(() => {
-            this.$router.push({ path: this.redirect || '/' })
-            this.loading = false
-          }).catch(() => {
-            this.loading = false
-          })
-        } else {
-          console.log('error submit!!')
-          return false
-        }
-      })
+    async login() {
+      try {
+        // validate 对整个表单进行校验的方法，参数为一个回调函数。
+        // 该回调函数会在校验结束后被调用，并传入两个参数：是否校验成功和未通过校验的字段。
+        // 若不传入回调函数，则会返回一个 promise
+        await this.$refs.loginForm.validate()
+        this.loading = true
+        // 接口请求
+        await this.$store.dispatch('user/loginAction', this.loginForm)
+      } finally {
+        this.loading = false
+      }
     }
   }
 }
@@ -138,7 +143,7 @@ export default {
 /* 修复input 背景不协调 和光标变色 */
 /* Detail see https://github.com/PanJiaChen/vue-element-admin/pull/927 */
 
-$bg:#283443;
+$bg:#d4e3ff;
 $light_gray:#68b0fe;
 $cursor: #fff;
 
@@ -253,6 +258,10 @@ $light_gray:#eee;
   height: 64px;
   line-height: 32px;
   font-size: 24px;
+  width:100%;
+  margin-bottom:30px;
+  border:none;
+  color:#fff;
 }
 
 }
