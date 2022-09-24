@@ -53,6 +53,13 @@
 </template>
 
 <script>
+// 环境变量作用
+// 1.正常公司中 有4个环境 开发dev，测试test，预发uat，上线pro
+// 2.在项目里如何配置这几个环境 通过.env配置base api
+// 开发环境的接口前缀 /api
+// 线上环境的接口前缀 /prod-api
+
+// 在 request.js中配置baseUrl:process.env.VUE_APP_BASE_API
 import { validUsername } from '@/utils/validate'
 
 export default {
