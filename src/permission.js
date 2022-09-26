@@ -10,11 +10,14 @@ const whiteList = ['/login', '/404']
 // 2.1.1 判断是否处于登录页面，是的话 跳首页 否则 直接留在当前页（直接放行 next()）
 // 2.2 token 不存在 说明 不处于登录状态
 // 2.2.1 判断一下 是否处于白名单 是的话 直接留在 当前页 否则 跳转到登录页
-router.beforeEach((to, from, next) => {
+router.beforeEach(async(to, from, next) => {
 //   console.log(to)
 //   console.log(from)
 //   next(false)
   if (store.getters.token) { // token 是否存在
+    if (!store.getters.userId) {
+      await store.dispatch('user/getUserInfo')
+    }
     if (to.path === '/login') { // 判断是否在登录页
       next('/')
     } else {

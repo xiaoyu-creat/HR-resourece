@@ -1,13 +1,23 @@
-// import request from '@/utils/request'
+import request from '@/utils/request'
 
-export function login(data) {
-
+/**
+ * 获取用户信息
+ * @returns Promise
+ */
+export function getUserInfo() {
+  return request({
+    url: '/sys/profile',
+    method: 'POST'
+  })
 }
 
-export function getInfo(token) {
+/**
+ * 获取员工详细信息
+ * @param {*} id 用户id
+ * @returns Promise
+ */
+export const getUserDetailById = (id) => request({
+  url: `/sys/user/${id}`,
+  method: 'GET'
+})
 
-}
-
-export function logout() {
-
-}
