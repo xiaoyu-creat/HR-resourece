@@ -131,6 +131,8 @@ export default {
         this.loading = true
         // 接口请求
         await this.$store.dispatch('user/loginAction', this.loginForm)
+        // 跳转页面
+        this.$router.push('/')
       } finally {
         this.loading = false
       }
