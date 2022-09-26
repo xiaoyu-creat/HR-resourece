@@ -1,5 +1,6 @@
-import { login } from '@/api'
-export default {
+import { loginAPI } from '@/api'
+
+export default ({
   namespaced: true,
   state: {
     token: null
@@ -9,14 +10,11 @@ export default {
       state.token = token
     }
   },
-  // 发送异步请求
   actions: {
-    // context 小store 里面有commit getters dispatch store
-    async loginAction({ commit }, loginData) {
-      // 请求
-      const { data: { data }} = await login(loginData)
-      console.log(data)
-      commit('SET_TOKEN', data)
+    async loginAction({ commit }, logindata) {
+      const { data: { token }} = await loginAPI(logindata)
+      // 发请求
+      commit('SET_TOKEN', token)
     }
   }
-}
+})

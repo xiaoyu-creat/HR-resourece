@@ -1,119 +1,103 @@
 <template>
   <div class="login-container">
-    <el-form
-      ref="loginForm"
-      class="login-form"
-      auto-complete="on"
-      label-position="left"
-      :model="loginForm"
-      :rules="rules"
-    >
-      <div class="title-container">
-        <h3 class="title">
-          <img src="@/assets/common/login-logo.png" alt="">
-        </h3>
-      </div>
-      <el-form-item prop="mobile">
-        <span class="svg-container el-icon-user-solid" />
-        <el-input v-model="loginForm.mobile" />
-      </el-form-item>
+    <div class="login-form">
+      <img class="logo-container" src="@/assets/common/logo.png" alt="">
+      <el-form
+        ref="loginForm"
+        class="login-form"
+        auto-complete="on"
+        label-position="left"
+        :model="loginForm"
+        :rules="rules"
+      >
+        <el-form-item prop="loginName">
+          <span class="svg-container el-icon-mobile-phone" />
+          <el-input v-model="loginForm.loginName" placeholder="请输入账号" />
+        </el-form-item>
 
-      <el-form-item prop="password">
-        <span class="svg-container">
-          <svg-icon icon-class="password" />
-        </span>
-        <el-input
-          ref="pwd"
-          v-model="loginForm.password"
-          :type="passwordType"
-        />
-        <span class="svg-container" @click="showPwd">
-          <svg-icon :icon-class="passwordType === 'password' ? 'eye':'eye-open'" />
-        </span>
-      </el-form-item>
+        <el-form-item prop="password">
+          <span class="svg-container">
+            <svg-icon icon-class="password" />
+          </span>
+          <el-input ref="pwd" v-model="loginForm.password" :type="passwordType" placeholder="请输入密码" />
+          <span class="svg-container" @click="showPwd">
+            <svg-icon :icon-class="passwordType === 'password' ? 'eye':'eye-open'" />
+          </span>
+        </el-form-item>
 
-      <el-button :loading="loading" class="loginBtn" @click="login">登录</el-button>
+        <el-form-item>
+          <span class="svg-container el-icon-s-claim" />
+          <el-input v-model="loginForm.code" class="codeipt" placeholder="请输入验证码" />
+          <div class="codepic" @click="getPic">
+            <img :src="codeurl" alt="">
+          </div>
+        </el-form-item>
 
-      <div class="tips">
-        <span style="margin-right:20px;">账号: 13800000002</span>
-        <span> 密码: 123456</span>
-      </div>
-    </el-form>
+        <el-button :loading="loading" class="login-btn" @click="login">登录</el-button>
+
+      </el-form>
+
+    </div>
   </div>
 </template>
 
 <script>
-// 环境变量作用
-// 1.正常公司中 有4个环境 开发dev，测试test，预发uat，上线pro
-// 2.在项目里如何配置这几个环境 通过.env配置base api
-// 开发环境的接口前缀 /api
-// 线上环境的接口前缀 /prod-api
-
-// 在 request.js中配置baseURL:process.env.VUE_APP_BASE_API
-// import { validUsername } from '@/utils/validate'
-
-// 密码盒子切换
-// 1.点击闭上眼睛图片 --》睁开type text 图片变为 睁开眼睛
-// 2.图片睁开眼睛 --》闭上 type password 图片变为 闭上眼睛
-
-// - El-form-item绑定对应的属性，El-input 绑定对应的值
-// - 手机号 必填 格式 按照国家要求来
-// - 密码  必填  程度6，16
-
-import { validPhone } from '@/utils/validate'
+import { getCodePic } from '@/api'
 export default {
   name: 'Login',
   data() {
-    // Validator接口有三个方法，可用于验证整个实体或仅验证实体的单个属性
-    const phoneValid = (rules, value, callback) => {
-      // rule 对应的规则
-      // value 对应的值
-      // callback 验证完成后调用的回调函数 验证通过直接调用 验证不通过 也是 调用 callback,但是会把错误信息 传递出去
-      if (!validPhone(value)) {
-        callback(new Error('格式错误'))
-      } else {
-        callback()
-      }
-    }
     return {
       passwordType: 'password',
       loginForm: {
-        mobile: '13800000002',
-        password: '123456'
+        loginName: 'admin',
+        password: 'admin',
+        code: '',
+        clientToken: '',
+        loginType: 0
       },
+      // 用户名和密码验证
       rules: {
-        mobile: [
+        loginName: [
           {
             required: true,
-            message: '手机号必填',
+            message: '请输入账号',
             trigger: 'blur'
           },
-          { validator: phoneValid, trigger: 'blur' }
-          // {
-          //   pattern: /^(?:(?:\+|00)86)?1(?:(?:3[\d])|(?:4[5-79])|(?:5[0-35-9])|(?:6[5-7])|(?:7[0-8])|(?:8[\d])|(?:9[189]))\d{8}$/,
-          //   message: '手机号格式不正确',
-          //   trigger: 'blur'
-          // }
+          {
+            pattern: /^[a-zA-Z0-9_-]{4,16}$/,
+            message: '用户名格式错误',
+            trigger: 'blur'
+          }
         ],
         password: [
           {
             required: true,
-            message: '密码必填',
+            message: '请输入密码',
             trigger: 'blur'
           },
           {
-            min: 6,
+            min: 4,
             max: 16,
-            message: '密码格式不正确',
+            message: '密码格式错误',
+            trigger: 'blur'
+          }
+        ],
+        code: [
+          {
+            required: true,
+            message: '请输入验证码',
             trigger: 'blur'
           }
         ]
       },
-      loading: false
+      loading: false,
+      codeurl: ''
     }
   },
   watch: {
-
+  },
+  created() {
+    this.getPic()
   },
   methods: {
     showPwd() {
@@ -122,15 +106,25 @@ export default {
         this.$refs.pwd.focus()
       })
     },
+    // 获取验证码图片
+    async getPic() {
+      this.loginForm.clientToken = Math.random()
+      const res = await getCodePic(this.loginForm.clientToken)
+      // this.codeurl = window.URL.createObjectURL(res.data)
+      this.codeurl = res.request.responseURL
+    },
+    // 登录请求
     async login() {
       try {
-        // validate 对整个表单进行校验的方法，参数为一个回调函数。
-        // 该回调函数会在校验结束后被调用，并传入两个参数：是否校验成功和未通过校验的字段。
-        // 若不传入回调函数，则会返回一个 promise
         await this.$refs.loginForm.validate()
         this.loading = true
         // 接口请求
         await this.$store.dispatch('user/loginAction', this.loginForm)
+        // 刷新验证码
+        this.getPic()
+        this.$router.push('/dashboard')
+      } catch (error) {
+        this.$toast(error)
       } finally {
         this.loading = false
       }
@@ -144,8 +138,8 @@ export default {
 /* Detail see https://github.com/PanJiaChen/vue-element-admin/pull/927 */
 
 $bg:#d4e3ff;
-$light_gray:#68b0fe;
-$cursor: #fff;
+$light_gray:#818693;
+$cursor: #ccc;
 
 @supports (-webkit-mask: none) and (not (cater-color: $cursor)) {
   .login-container .el-input input {
@@ -155,9 +149,10 @@ $cursor: #fff;
 
 /* reset element-ui css */
 .login-container {
-  background-image: url('~@/assets/common/login.jpg'); // 设置背景图片
+  background-image: url('~@/assets/common/background.png'); // 设置背景图片
   background-position: center; // 将图片位置设置为充满整个屏幕
   .el-input {
+    position: relative;
     display: inline-block;
     height: 47px;
     width: 85%;
@@ -171,6 +166,7 @@ $cursor: #fff;
       color: $light_gray;
       height: 47px;
       caret-color: $cursor;
+      width: 70.8333333333%;
 
       &:-webkit-autofill {
         box-shadow: 0 0 0px 1000px $bg inset !important;
@@ -178,17 +174,24 @@ $cursor: #fff;
       }
     }
   }
+  .codepic{
+    position: absolute;
+    right: 0;
+    bottom: -3px;
+    width: 29.1666666667%;
+    height: 50px;
+  }
 
   .el-form-item {
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    background: rgba(255, 255, 255, 0.7);
-    border-radius: 5px;
-    color: #454545;
-  }
-  .el-form-item__error {
-    color: #fff
-  }
+    width: 100%;
+    height: 52px;
+    margin-bottom: 24px;
+    background: #fff;
+    border: 1px solid #e2e2e2;
+    border-radius: 4px;
 }
+  }
+
 </style>
 
 <style lang="scss" scoped>
@@ -203,12 +206,18 @@ $light_gray:#eee;
   overflow: hidden;
 
   .login-form {
-    position: relative;
-    width: 520px;
-    max-width: 100%;
-    padding: 160px 35px 0;
-    margin: 0 auto;
-    overflow: hidden;
+    position: absolute;
+    width: 518px;
+    height: 388px;
+    top: 50%;
+    left: 50%;
+    margin-top: -194px;
+    margin-left: -259px;
+    padding: 76px 35px 0;
+    background: #fff;
+    -webkit-box-shadow: 0 3px 70px 0 rgb(30 111 72 / 35%);
+    box-shadow: 0 3px 70px 0 rgb(30 111 72 / 35%);
+    border-radius: 10px;
   }
 
   .tips {
@@ -231,16 +240,14 @@ $light_gray:#eee;
     display: inline-block;
   }
 
-  .title-container {
-    position: relative;
-
-    .title {
-      font-size: 26px;
-      color: $light_gray;
-      margin: 0px auto 40px auto;
-      text-align: center;
-      font-weight: bold;
-    }
+  .logo-container {
+    position: absolute;
+    width: 96px;
+    height: 96px;
+    top: -46px;
+    left: 50%;
+    margin-left: -48px;
+    z-index: 10;
   }
 
   .show-pwd {
@@ -253,16 +260,18 @@ $light_gray:#eee;
     user-select: none;
   }
 
-  .loginBtn {
-  background: #407ffe;
-  height: 64px;
-  line-height: 32px;
-  font-size: 24px;
-  width:100%;
-  margin-bottom:30px;
-  border:none;
-  color:#fff;
+  .login-btn {
+    width: 100%;
+    height: 52px;
+    background: linear-gradient(262deg,#2e50e1,#6878f0);
+    opacity: .91;
+    border-radius: 8px;
+    color: #fff;
+    text-shadow: 0 7px 22px #cfcfcf;
 }
+ .el-form-item__error {
+    color: #fff
+  }
 
 }
 </style>
