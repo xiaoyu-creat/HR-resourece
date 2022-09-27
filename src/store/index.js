@@ -17,7 +17,7 @@ const store = new Vuex.Store({
   getters,
   // 持久化插件 npm install --save vuex-persistedstate@3.2.1
   plugins: [createPersistedState({
-    paths: ['user.token'] // 可以缓存模块的特殊字段
+    paths: ['user.token', 'user.hrsaasTime'] // 可以缓存模块的特殊字段
     // reducer(state) {
     //   return {
     //     user: state.user.token

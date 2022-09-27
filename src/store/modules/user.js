@@ -3,7 +3,8 @@ export default {
   namespaced: true,
   state: {
     token: null,
-    userInfo: {}
+    userInfo: {},
+    hrsaasTime: null
   },
   mutations: {
     SET_TOKEN(state, token) {
@@ -14,6 +15,12 @@ export default {
     },
     REMOVE_USER_INFO(state) {
       state.userInfo = {}
+    },
+    REMOVE_TOKEN(state) {
+      state.token = null
+    },
+    SET_HRSAAS_TIME(state, hrsaasTime) {
+      state.hrsaasTime = hrsaasTime
     }
   },
   // 发送异步请求
@@ -23,8 +30,9 @@ export default {
     async loginAction({ commit }, loginData) {
       // 请求
       const data = await login(loginData)
-      console.log(data)
+      // console.log(data)
       commit('SET_TOKEN', data)
+      commit('SET_HRSAAS_TIME', new Date().getTime()) // 时间1  登录成功接口调用的时间
     },
     async getUserInfo({ commit }) {
       // 接口请求
@@ -33,6 +41,12 @@ export default {
       const result = { ...res, ...res1 }
       commit('SET_USER_INFO', result)
       return JSON.parse(JSON.stringify(result))
+    },
+    logout({ commit }) {
+      // 清空用户数据 userInfo
+      commit('REMOVE_USER_INFO')
+      // 清空token 会同步到持久化，自动清除本地存储
+      commit('REMOVE_TOKEN')
     }
   }
 }

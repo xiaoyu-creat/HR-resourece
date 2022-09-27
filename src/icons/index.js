@@ -21,4 +21,4 @@ const requireAll = requireContext => requireContext.keys().map(val => {
 
 // ['./dashboard.svg'].map(requireContext) //[]
 requireAll(req)
-console.log(requireAll(req))
+// console.log(requireAll(req))
