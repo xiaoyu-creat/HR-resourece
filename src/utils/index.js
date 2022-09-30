@@ -115,3 +115,27 @@ export function param2Obj(url) {
   })
   return obj
 }
+
+/**
+ * 封装一个函数 找到第一层数据
+ * 定义函数 确定形参 两个list需要处理的函数 rootValue：父元素的id
+ * 定义好arr 用来接收找到的元素
+ * 返回arr
+ * @param {Array} list
+ * @param {String} rootValue
+ * @returns Promise
+ */
+export function tranListToTreeData(list, rootValue) {
+  const arr = []
+  list.forEach(ele => {
+    if (ele.pid === rootValue) {
+      // 考虑 ele 有没有子元素
+      const children = tranListToTreeData(list, ele.id)
+      if (children.length > 0) {
+        ele.children = children
+      }
+      arr.push(ele)
+    }
+  })
+  return arr
+}

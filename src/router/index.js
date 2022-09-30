@@ -13,7 +13,7 @@ Vue.use(Router)
 /* Layout */
 import Layout from '@/layout'
 
-const asyncRoutes = [approvalsRouter, attendancesRouter, departmentsRouter, employeesRouter, permissionRouter, salarysRouter, settingRouter, socialRouter]
+const asyncRoutes = [approvalsRouter, departmentsRouter, employeesRouter, permissionRouter, attendancesRouter, salarysRouter, settingRouter, socialRouter]
 
 /**
  * Note: sub-menu only appear when route children.length >= 1
