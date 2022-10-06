@@ -1,5 +1,5 @@
 <template>
-  <div class="departments-container">
+  <div v-loading="loading" class="departments-container">
     <el-card>
       <treeTools :tree-node="company" :is-root="false" @addDept="handleAddRole" />
     </el-card>
@@ -7,10 +7,10 @@
       <!-- el-tree 里面的内容 就是插槽内容--填坑内容 --》有多少个节点循环多少次 -->
       <!-- scope-scope 是tree组件传给每个节点的插槽的内容的数据 -->
       <!-- 顺序一定是 执行 slot-scope赋值 才去执行props的传值 -->
-      <treeTools slot-scope="{data}" :tree-node="data" @addDept="handleAddRole" />
+      <treeTools slot-scope="{data}" :tree-node="data" @editDept="editDept" @addDept="handleAddRole" @refreshList="getDepartments" />
     </el-tree>
     <!-- 放置新增弹层组件  -->
-    <add-dept :dialog-visible.sync="dialogVisible" :tree-node="currentNode" />
+    <add-dept ref="addDept" :dialog-visible.sync="dialogVisible" :tree-node="currentNode" />
   </div>
 </template>
 
@@ -32,7 +32,8 @@ export default {
         { name: '行政部', manager: '刘备' },
         { name: '人事部', manager: '孙权' }],
       dialogVisible: false, // 显示窗体
-      currentNode: {}
+      currentNode: {},
+      loading: false
     }
   },
   mounted() {
@@ -41,9 +42,14 @@ export default {
   methods: {
     // 组织架构数据
     async getDepartments() {
-      const { depts, companyManage, companyName } = await getDepartments()
-      this.departs = tranListToTreeData(depts, '')
-      this.company = { name: companyName, manager: companyManage, id: '' }
+      try {
+        this.loading = true
+        const { depts, companyManage, companyName } = await getDepartments()
+        this.departs = tranListToTreeData(depts, '')
+        this.company = { name: companyName, manager: companyManage, id: '' }
+      } finally {
+        this.loading = false
+      }
     },
     handleAddRole(node) {
       // addDept 显示
@@ -51,6 +57,15 @@ export default {
       // addDept 组件 绑定变量 dialogVisible
       this.dialogVisible = true
       this.currentNode = node
+    },
+    editDept(node) {
+      // console.log(node)
+      // 父组件接收到数据  回显内容，显示弹窗
+      this.dialogVisible = true
+      this.currentNode = { ...node }
+      // 回显数据
+      // node复制 给addDept 的 formData
+      this.$refs.addDept.formData = { ...node }
     }
   }
 }
