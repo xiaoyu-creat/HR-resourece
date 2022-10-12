@@ -15,6 +15,12 @@ import router from './router'
 import '@/icons' // icon
 import '@/permission' // permission control
 
+// 注册全局组件
+// import PageTools from '@/components/PageTools'
+// Vue.component('PageTools',PageTools)
+import components from '@/components'
+Vue.use(components)
+
 import * as directives from '@/directives'
 // console.log(directives)
 // console.log(Object.keys(directives))
