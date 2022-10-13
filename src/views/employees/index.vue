@@ -46,7 +46,7 @@
         </el-table-column>
         <el-table-column label="操作" fixed="right" width="280">
           <template slot-scope="{row}">
-            <el-button type="text" size="small">查看</el-button>
+            <el-button type="text" size="small" @click="goDetail(row)">查看</el-button>
             <el-button type="text" size="small">转正</el-button>
             <el-button type="text" size="small">调岗</el-button>
             <el-button type="text" size="small">离职</el-button>
@@ -75,7 +75,7 @@
 import EmployeeEnum from '@/api/constant/employees'
 import PageTools from '@/components/PageTools'
 import { getEmployeeList, delEmployee } from '@/api'
-import addemployment from './add-employee.vue'
+import addemployment from './components/add-employee.vue'
 export default {
   components: { PageTools, addemployment },
   data() {
@@ -179,6 +179,11 @@ export default {
         autoWidth: true, // 非必填
         bookType: 'xlsx' // 非必填
       })
+    },
+    // 查看员工详情
+    goDetail(row) {
+      // 编程式导航
+      this.$router.push('/employees/detail/' + row.id)
     }
   }
 }
