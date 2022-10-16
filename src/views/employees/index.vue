@@ -30,6 +30,11 @@
     <el-card>
       <el-table v-loading="loading" border :data="list">
         <el-table-column label="序号" type="index" sortable="" width="80" />
+        <el-table-column label="头像" prop="staffPhoto" width="80">
+          <template slot-scope="{row}">
+            <img style="width:100%;heigth:100%" :src="row.staffPhoto" alt="" @click="genQrCode(row.staffPhoto)">
+          </template>
+        </el-table-column>
         <el-table-column label="姓名" prop="username" />
         <el-table-column label="工号" prop="workNumber" />
         <el-table-column label="聘用形式" prop="formOfEmployment" :formatter="formatterFn" />
@@ -69,6 +74,14 @@
       </el-row>
     </el-card>
     <addemployment :dialog-visible.sync="dialogVisible" />
+    <el-dialog
+      title="提示"
+      :visible.sync="dialogVisibleQrCode"
+      width="50%"
+    >
+      <!-- 懒渲染：内容默认没有创建，弹层显示的时候才创建 -->
+      <canvas ref="canvas" />
+    </el-dialog>
   </div>
 </template>
 <script>
@@ -76,6 +89,7 @@ import EmployeeEnum from '@/api/constant/employees'
 import PageTools from '@/components/PageTools'
 import { getEmployeeList, delEmployee } from '@/api'
 import addemployment from './components/add-employee.vue'
+import QRCode from 'qrcode'
 export default {
   components: { PageTools, addemployment },
   data() {
@@ -88,7 +102,8 @@ export default {
       total: 0,
       loading: false,
       hireType: EmployeeEnum.hireType,
-      dialogVisible: false
+      dialogVisible: false,
+      dialogVisibleQrCode: false
     }
   },
   mounted() {
@@ -184,6 +199,22 @@ export default {
     goDetail(row) {
       // 编程式导航
       this.$router.push('/employees/detail/' + row.id)
+    },
+    genQrCode(staffPhoto) {
+      // 2.vue:数据驱动/组件系统
+      // 数据驱动：数据变化 => 视图变化
+      // 数据变化同步 -> vue背后 将视图更新（异步的）
+      // why？如果数据是同步的 数据变 视图更新 太消耗性能
+      // 等所有的数据变化了
+      if (!staffPhoto) return this.$message.error('暂无头像')
+      this.dialogVisibleQrCode = true
+      // 等视图更新后触发，获取最新视图
+      this.$nextTick(() => {
+        QRCode.toCanvas(this.$refs.canvas, staffPhoto, function(error) {
+          if (error) console.log(error)
+          console.log('success!')
+        })
+      })
     }
   }
 }

@@ -1,8 +1,10 @@
 <template>
   <div class="dashboard-container">
     <div class="dashboard-text">name: {{ name }}</div>
-    <svg-icon icon-class="eye-open" />
+
     <!-- <UploadExcel :on-success="handleSuccess" :before-upload="beforeUpload" /> -->
+    <uploadImg @on-success="onSuccess1" />
+    <uploadImg @on-success="onSuccess2" />
   </div>
 </template>
 
@@ -20,6 +22,12 @@ export default {
     // this.$store.dispatch('user/getUserInfo')
   },
   methods: {
+    onSuccess1(val) {
+      console.log(123, val)
+    },
+    onSuccess2(val) {
+      console.log(456, val)
+    }
     // handleSuccess(data) {
     //   console.log('data', data)
     // // 做具体的业务逻辑操作
